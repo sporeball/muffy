@@ -1,0 +1,23 @@
+{
+  "name": "muffy",
+  "version": "0.0.0",
+  "description": "Discord bot that temporarily restricts the channels you're allowed to use",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sporeball/muffy.git"
+  },
+  "author": "sporeball",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sporeball/muffy/issues"
+  },
+  "homepage": "https://github.com/sporeball/muffy#readme",
+  "dependencies": {
+    "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0"
+  }
+}
