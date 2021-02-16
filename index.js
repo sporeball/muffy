@@ -61,7 +61,7 @@ client.on('ready', () => {
 // emitted on message
 client.on('message', msg => {
   console.log(msg.content);
-  if (msg.mentions.members.first() && msg.mentions.members.first().user.tag == TAG) {
+  if (msg.guild && msg.mentions.members.first() && msg.mentions.members.first().user.tag == TAG) {
     call(msg);
   }
 });
