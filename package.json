@@ -18,6 +18,7 @@
   "homepage": "https://github.com/sporeball/muffy#readme",
   "dependencies": {
     "conf": "^9.0.0",
+    "dayjs": "^1.10.4",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0"
   }
