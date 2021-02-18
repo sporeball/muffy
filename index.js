@@ -32,15 +32,15 @@ const commands = {
   },
   "whitelist": (args, _msg) => {
     let whitelist = `users.${_msg.author.id}.${_msg.guild.id}.whitelist`;
-    // "@Muffy whitelist"
+    // @Muffy whitelist
     if (args.length == 0) {
       _msg.channel.send(`your whitelist is ${(conf.get(whitelist) === undefined || conf.get(whitelist).length == 0) ? "empty!" : conf.get(whitelist).map(x => `<#${x}>`).join(", ")}`);
     } else {
-      // "@Muffy whitelist reset"
+      // @Muffy whitelist reset
       if (args[0] == "reset") {
         conf.set(whitelist, []);
         _msg.channel.send("reset your whitelist!");
-      // "@Muffy whitelist [#channel]"
+      // @Muffy whitelist [#channel]
       } else if (args[0].match(/^<#\d+>$/)) {
         // assert every argument is a channel
         if (args.every(x => x.match(/^<#\d+>$/))) {
@@ -49,7 +49,7 @@ const commands = {
         } else {
           raise(_msg, "i can't do that! (make sure you only reference channels!)");
         }
-      // "@Muffy whitelist [@user]"
+      // @Muffy whitelist [@user]
       } else if (args[0].match(/^<@!?\d+>$/)) {
         let w = `users.${_msg.mentions.members.array().find((u, i) => i == 1).user.id}.${_msg.guild.id}.whitelist`;
         _msg.channel.send(`this user's whitelist is ${(conf.get(w) === undefined || conf.get(w).length == 0) ? "empty!" : conf.get(w).map(x => `<#${x}>`).join(", ")}`);
@@ -65,7 +65,7 @@ const commands = {
     if (args.length == 0) {
       _msg.channel.send(`${conf.get(offset) === undefined ? "you haven't set your offset!" : `your offset is UTC${conf.get(offset)}`}`);
     // @Muffy offset [valid offset]
-    } else if (offsets.includes(args[0])) {
+    } else if (args[0].match(offsets)) {
       conf.set(offset, args[0]);
       _msg.channel.send("set your UTC offset!");
     // anything else
@@ -75,8 +75,7 @@ const commands = {
   }
 };
 
-// this is horrible, please tell me someone somewhere has abstracted this out
-const offsets = ["-12", "-11", "-10", "-9:30", "-9", "-8", "-7", "-6", "-5", "-4", "-3:30", "-3", "-2", "-1", "0", "1", "2", "3", "3:30", "4", "4:30", "5", "5:30", "5:45", "6", "6:30", "7", "8", "8:45", "9", "9:30", "10", "10:30", "11", "12", "12:45", "13", "14"];
+const offsets = /^(-?[39]|[456]|10):30$|^([58]|12):45$|^-?([2-9]|1[0-2]?)$|^13$|^14$|^0$/;
 
 // emitted when muffy is ready to start
 client.on('ready', () => {
