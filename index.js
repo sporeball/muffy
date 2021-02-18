@@ -28,7 +28,14 @@ const commands = {
   },
   "time": (args, _msg) => {
     let date = dayjs.utc();
-    _msg.channel.send(`it is ${date.format("h:mma")} on ${date.format("MMMM D, YYYY")} right now (UTC time)`);
+    // @Muffy time
+    if (args.length == 0) {
+      let offset = +(conf.get(`users.${_msg.author.id}.offset`).replace(":30", ".5").replace(":45", ".75")) * 60;
+      // TODO: handle empty offset
+      _msg.channel.send(`it is ${date.utcOffset(offset).format("h:mma")} on ${date.format("MMMM D, YYYY")} for you right now`);
+    // TODO: other cases
+    } else {
+    }
   },
   "whitelist": (args, _msg) => {
     let whitelist = `users.${_msg.author.id}.${_msg.guild.id}.whitelist`;
