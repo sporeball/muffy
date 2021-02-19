@@ -46,13 +46,13 @@ const commands = {
       // @Muffy whitelist reset
       if (args[0] == "reset") {
         conf.set(whitelist, []);
-        _msg.channel.send("reset your whitelist!");
+        _msg.react("✅");
       // @Muffy whitelist [#channel]
       } else if (args[0].match(/^<#\d+>$/)) {
         // assert every argument is a channel
         if (args.every(x => x.match(/^<#\d+>$/))) {
           conf.set(whitelist, _msg.mentions.channels.array().map(x => x.id));
-          _msg.channel.send(`updated your whitelist!`);
+          _msg.react("✅");
         } else {
           raise(_msg, "i can't do that! (make sure you only reference channels!)");
         }
@@ -74,7 +74,7 @@ const commands = {
     // @Muffy offset [valid offset]
     } else if (args[0].match(offsets)) {
       conf.set(offset, args[0]);
-      _msg.channel.send("set your UTC offset!");
+      _msg.react("✅");
     // anything else
     } else {
       raise(_msg, "that isn't a valid UTC offset!");
@@ -91,7 +91,6 @@ client.on('ready', () => {
 
 // emitted on message
 client.on('message', msg => {
-  console.log(msg.content);
   if (msg.guild && msg.mentions.members.first() && msg.mentions.members.first().user.tag == TAG) {
     call(msg);
   }
