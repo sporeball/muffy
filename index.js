@@ -89,7 +89,7 @@ const commands = {
     let offset = `users.${_msg.author.id}.offset`;
     // @Muffy offset
     if (args.length == 0) {
-      _msg.channel.send(`${exists(offset) ? "you haven't set your offset!" : `your offset is UTC${conf.get(offset)}`}`);
+      _msg.channel.send(`${exists(offset) ? `your offset is UTC${conf.get(offset)}` : "you haven't set your offset!"}`);
     // @Muffy offset [valid offset]
     } else if (args[0].match(offsets)) {
       set(offset, args[0], _msg);
@@ -103,7 +103,7 @@ const commands = {
     let range = `users.${_msg.author.id}.${_msg.guild.id}.range`;
     // @Muffy range
     if (args.length == 0) {
-      _msg.channel.send(`${exists(range) ? "you haven't set your time range!" : `your time range is ${conf.get(range)}`}`);
+      _msg.channel.send(`${exists(range) ? `your time range is ${conf.get(range)}` : "you haven't set your time range!"}`);
     // @Muffy range [valid range]
     } else if (args[0].match(ranges)) {
       set(range, args[0], _msg);
