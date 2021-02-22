@@ -8,16 +8,18 @@
 // dependencies
 require("dotenv").config();
 
+// Discord.js
 const Discord = require("discord.js");
 const client = new Discord.Client();
-const TAG = "Muffy#8727";
 
+// database
 const Conf = require("conf");
 const conf = new Conf({
   configName: "db",
   cwd: "."
 });
 
+// dayjs
 const dayjs = require("dayjs");
 var utc = require("dayjs/plugin/utc");
 dayjs.extend(utc);
@@ -26,6 +28,7 @@ dayjs.extend(customParseFormat);
 var isBetween = require("dayjs/plugin/isBetween");
 dayjs.extend(isBetween);
 
+// regex helpers
 const offsets = /^(-?[39]|[456]|10):30$|^([58]|12):45$|^-?([2-9]|1[0-2]?)$|^13$|^14$|^0$/;
 
 const H = "([2-9]|1[0-2]?)";
@@ -33,6 +36,9 @@ const MM = "(:[0-5][0-9])";
 const a = "(am|pm)";
 const times = `${H}${MM}${a}`;
 const ranges = new RegExp(`${times}-${times}`, "gm");
+
+// log symbols
+const symbols = require("log-symbols");
 
 const commands = {
   "ping": (args, _msg) => {
@@ -55,25 +61,23 @@ const commands = {
     let whitelist = `users.${_msg.author.id}.${_msg.guild.id}.whitelist`;
     // @Muffy whitelist
     if (args.length == 0) {
-      _msg.channel.send(`your whitelist is ${(conf.get(whitelist) === undefined || conf.get(whitelist).length == 0) ? "empty!" : conf.get(whitelist).map(x => `<#${x}>`).join(", ")}`);
+      _msg.channel.send(`your whitelist is ${exists(whitelist) ? conf.get(whitelist).map(x => `<#${x}>`).join(", ") : "empty!"}`);
     } else {
       // @Muffy whitelist reset
       if (args[0] == "reset") {
-        conf.set(whitelist, []);
-        _msg.react("✅");
+        set(whitelist, [], _msg);
       // @Muffy whitelist [#channel]
       } else if (args[0].match(/^<#\d+>$/)) {
         // assert every argument is a channel
         if (args.every(x => x.match(/^<#\d+>$/))) {
-          conf.set(whitelist, _msg.mentions.channels.array().map(x => x.id));
-          _msg.react("✅");
+          set(whitelist, _msg.mentions.channels.array().map(x => x.id), _msg);
         } else {
           raise(_msg, "i can't do that! (make sure you only reference channels!)");
         }
       // @Muffy whitelist [@user]
       } else if (args[0].match(/^<@!?\d+>$/)) {
         let w = `users.${_msg.mentions.members.array().find((u, i) => i == 1).user.id}.${_msg.guild.id}.whitelist`;
-        _msg.channel.send(`this user's whitelist is ${(conf.get(w) === undefined || conf.get(w).length == 0) ? "empty!" : conf.get(w).map(x => `<#${x}>`).join(", ")}`);
+        _msg.channel.send(`this user's whitelist is ${exists(w) ? conf.get(w).map(x => `<#${x}>`).join(", ") : "empty!"}`);
       // anything else
       } else {
         raise(_msg, "that isn't a valid argument!");
@@ -85,11 +89,10 @@ const commands = {
     let offset = `users.${_msg.author.id}.offset`;
     // @Muffy offset
     if (args.length == 0) {
-      _msg.channel.send(`${conf.get(offset) === undefined ? "you haven't set your offset!" : `your offset is UTC${conf.get(offset)}`}`);
+      _msg.channel.send(`${exists(offset) ? "you haven't set your offset!" : `your offset is UTC${conf.get(offset)}`}`);
     // @Muffy offset [valid offset]
     } else if (args[0].match(offsets)) {
-      conf.set(offset, args[0]);
-      _msg.react("✅");
+      set(offset, args[0], _msg);
     // anything else
     } else {
       raise(_msg, "that isn't a valid UTC offset!");
@@ -100,12 +103,11 @@ const commands = {
     let range = `users.${_msg.author.id}.${_msg.guild.id}.range`;
     // @Muffy range
     if (args.length == 0) {
-      _msg.channel.send(`${conf.get(range) === undefined ? "you haven't set your time range!" : `your time range is ${conf.get(range)}`}`);
+      _msg.channel.send(`${exists(range) ? "you haven't set your time range!" : `your time range is ${conf.get(range)}`}`);
     // @Muffy range [valid range]
     } else if (args[0].match(ranges)) {
-      conf.set(range, args[0]);
-      _msg.react("✅");
-      // anything else
+      set(range, args[0], _msg);
+    // anything else
     } else {
       raise(_msg, "that isn't a valid time range!");
     }
@@ -114,12 +116,12 @@ const commands = {
 
 // emitted when muffy is ready to start
 client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+  console.log(symbols.success, " logged in!");
+  console.log(symbols.info, ` storing data for ${Object.keys(conf.get("users")).length} users\n`)
 });
 
 // emitted on message
 client.on('message', msg => {
-  console.log(msg.content);
   if (msg.guild && msg.content.match(/^<@!?806929919929614346>/)) {
     call(msg);
   }
@@ -137,8 +139,17 @@ call = _msg => {
   }
 }
 
+// utils
 raise = (_msg, err) => {
   _msg.channel.send(err);
 }
+
+set = (key, value, _msg) => {
+  conf.set(key, value);
+  _msg.react("✅");
+  console.log(symbols.info, ` user ${(_msg.author.id + "").padEnd(20, " ")} ${key.slice(key.lastIndexOf(".") + 1).padEnd(9, " ")} -> ${(typeof value === "object" ? `length ${value.length}` : value).padEnd(15, " ")} (server ${_msg.guild.id})`);
+}
+
+exists = key => !(conf.get(key) === undefined || conf.get(key).length == 0);
 
 client.login(process.env.TOKEN);
