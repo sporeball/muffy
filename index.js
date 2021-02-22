@@ -21,11 +21,24 @@ const conf = new Conf({
 const dayjs = require("dayjs");
 var utc = require("dayjs/plugin/utc");
 dayjs.extend(utc);
+var customParseFormat = require("dayjs/plugin/customParseFormat");
+dayjs.extend(customParseFormat);
+var isBetween = require("dayjs/plugin/isBetween");
+dayjs.extend(isBetween);
+
+const offsets = /^(-?[39]|[456]|10):30$|^([58]|12):45$|^-?([2-9]|1[0-2]?)$|^13$|^14$|^0$/;
+
+const H = "([2-9]|1[0-2]?)";
+const MM = "(:[0-5][0-9])";
+const a = "(am|pm)";
+const times = `${H}${MM}${a}`;
+const ranges = new RegExp(`${times}-${times}`, "gm");
 
 const commands = {
   "ping": (args, _msg) => {
     _msg.channel.send("pong!")
   },
+
   "time": (args, _msg) => {
     let date = dayjs.utc();
     // @Muffy time
@@ -37,6 +50,7 @@ const commands = {
     } else {
     }
   },
+
   "whitelist": (args, _msg) => {
     let whitelist = `users.${_msg.author.id}.${_msg.guild.id}.whitelist`;
     // @Muffy whitelist
@@ -66,6 +80,7 @@ const commands = {
       }
     }
   },
+
   "offset": (args, _msg) => {
     let offset = `users.${_msg.author.id}.offset`;
     // @Muffy offset
@@ -79,10 +94,23 @@ const commands = {
     } else {
       raise(_msg, "that isn't a valid UTC offset!");
     }
+  },
+
+  "range": (args, _msg) => {
+    let range = `users.${_msg.author.id}.${_msg.guild.id}.range`;
+    // @Muffy range
+    if (args.length == 0) {
+      _msg.channel.send(`${conf.get(range) === undefined ? "you haven't set your time range!" : `your time range is ${conf.get(range)}`}`);
+    // @Muffy range [valid range]
+    } else if (args[0].match(ranges)) {
+      conf.set(range, args[0]);
+      _msg.react("✅");
+      // anything else
+    } else {
+      raise(_msg, "that isn't a valid time range!");
+    }
   }
 };
-
-const offsets = /^(-?[39]|[456]|10):30$|^([58]|12):45$|^-?([2-9]|1[0-2]?)$|^13$|^14$|^0$/;
 
 // emitted when muffy is ready to start
 client.on('ready', () => {
@@ -91,7 +119,8 @@ client.on('ready', () => {
 
 // emitted on message
 client.on('message', msg => {
-  if (msg.guild && msg.mentions.members.first() && msg.mentions.members.first().user.tag == TAG) {
+  console.log(msg.content);
+  if (msg.guild && msg.content.match(/^<@!?806929919929614346>/)) {
     call(msg);
   }
 });
