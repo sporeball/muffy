@@ -142,9 +142,15 @@ client.on('message', msg => {
     let range = `users.${author}.${guild}.range`;
     if (exists(offset) && exists(range)) {
       let hrs = conf.get(range).split("-");
+      let rangeStart = dayjs(hrs[0], "h:mma");
+      let rangeEnd = dayjs(hrs[1], "h:mma");
       offset = Number(conf.get(offset).replace(":30", ".5").replace(":45", ".75")) * 60;
 
-      if (dayjs(dayjs.utc().utcOffset(offset).format("h:mma"), "h:mma").isBetween(dayjs(hrs[0], "h:mma"), dayjs(hrs[1], "h:mma"))) {
+      if (hrs[0].endsWith("pm") && hrs[1].endsWith("am")) {
+        rangeEnd = rangeEnd.add(1, "day");
+      }
+
+      if (dayjs(dayjs.utc().utcOffset(offset).format("h:mma"), "h:mma").isBetween(rangeStart, rangeEnd)) {
         if (!conf.get(whitelist).includes(String(msg.channel.id))) {
           msg.react("🟡");
         }
