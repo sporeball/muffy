@@ -152,7 +152,8 @@ client.on('message', msg => {
 
       if (dayjs(dayjs.utc().utcOffset(offset).format("h:mma"), "h:mma").isBetween(rangeStart, rangeEnd)) {
         if (!conf.get(whitelist).includes(String(msg.channel.id))) {
-          msg.react("🟡");
+          msg.delete()
+            .then(() => console.log(symbols.warning, ` user ${(author + "").padEnd(20, " ")} had message deleted          (server ${guild})`));
         }
       }
     }
