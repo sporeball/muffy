@@ -62,26 +62,24 @@ const commands = {
     // @Muffy whitelist
     if (args.length == 0) {
       _msg.channel.send(`your whitelist is ${exists(whitelist) ? conf.get(whitelist).map(x => `<#${x}>`).join(", ") : "empty!"}`);
-    } else {
-      // @Muffy whitelist reset
-      if (args[0] == "reset") {
-        set(whitelist, [], _msg);
-      // @Muffy whitelist [#channel]
-      } else if (args[0].match(/^<#\d+>$/)) {
-        // assert every argument is a channel
-        if (args.every(x => x.match(/^<#\d+>$/))) {
-          set(whitelist, _msg.mentions.channels.array().map(x => x.id), _msg);
-        } else {
-          raise(_msg, "i can't do that! (make sure you only reference channels!)");
-        }
-      // @Muffy whitelist [@user]
-      } else if (args[0].match(/^<@!?\d+>$/)) {
-        let w = `users.${_msg.mentions.members.array().find((u, i) => i == 1).user.id}.${_msg.guild.id}.whitelist`;
-        _msg.channel.send(`this user's whitelist is ${exists(w) ? conf.get(w).map(x => `<#${x}>`).join(", ") : "empty!"}`);
-      // anything else
+    // @Muffy whitelist reset
+    } else if (args[0] == "reset") {
+      set(whitelist, [], _msg);
+    // @Muffy whitelist [#channel]
+    } else if (args[0].match(/^<#\d+>$/)) {
+      // assert every argument is a channel
+      if (args.every(x => x.match(/^<#\d+>$/))) {
+        set(whitelist, _msg.mentions.channels.array().map(x => x.id), _msg);
       } else {
-        raise(_msg, "that isn't a valid argument!");
+        raise(_msg, "i can't do that! (make sure you only reference channels!)");
       }
+    // @Muffy whitelist [@user]
+    } else if (args[0].match(/^<@!?\d+>$/)) {
+      let w = `users.${_msg.mentions.members.array().find((u, i) => i == 1).user.id}.${_msg.guild.id}.whitelist`;
+      _msg.channel.send(`this user's whitelist is ${exists(w) ? conf.get(w).map(x => `<#${x}>`).join(", ") : "empty!"}`);
+    // anything else
+    } else {
+      raise(_msg, "that isn't a valid argument!");
     }
   },
 
@@ -90,9 +88,16 @@ const commands = {
     // @Muffy offset
     if (args.length == 0) {
       _msg.channel.send(`${exists(offset) ? `your offset is UTC${conf.get(offset)}` : "you haven't set your offset!"}`);
+    // @Muffy offset reset
+    } else if (args[0] == "reset") {
+      set(offset, "", _msg);
     // @Muffy offset [valid offset]
     } else if (args[0].match(offsets)) {
       set(offset, args[0], _msg);
+    // @Muffy offset [@user]
+    } else if (args[0].match(/^<@!?\d+>$/)) {
+      let o = `users.${_msg.mentions.members.array().find((u, i) => i == 1).user.id}.offset`;
+      _msg.channel.send(`${exists(o) ? `this user's offset is ${conf.get(o)}` : `this user hasn't set their offset!`}`);
     // anything else
     } else {
       raise(_msg, "that isn't a valid UTC offset!");
@@ -104,9 +109,16 @@ const commands = {
     // @Muffy range
     if (args.length == 0) {
       _msg.channel.send(`${exists(range) ? `your time range is ${conf.get(range)}` : "you haven't set your time range!"}`);
+    // @Muffy range reset
+    } else if (args[0] == "reset") {
+      set(range, "", _msg);
     // @Muffy range [valid range]
     } else if (args[0].match(ranges)) {
       set(range, args[0], _msg);
+    // @Muffy range [@user]
+    } else if (args[0].match(/^<@!?\d+>$/)) {
+      let r = `users.${_msg.mentions.members.array().find((u, i) => i == 1).user.id}.${_msg.guild.id}.range`;
+      _msg.channel.send(`${exists(r) ? `this user's time range is ${conf.get(r)}` : `this user hasn't set their time range!`}`);
     // anything else
     } else {
       raise(_msg, "that isn't a valid time range!");
