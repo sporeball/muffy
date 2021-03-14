@@ -134,6 +134,24 @@ client.on('ready', () => {
 
 // emitted on message
 client.on('message', msg => {
+  if (msg.guild) {
+    let author = msg.author.id;
+    let guild = msg.guild.id;
+    let whitelist = `users.${author}.${guild}.whitelist`;
+    let offset = `users.${author}.offset`;
+    let range = `users.${author}.${guild}.range`;
+    if (exists(offset) && exists(range)) {
+      let hrs = conf.get(range).split("-");
+      offset = Number(conf.get(offset).replace(":30", ".5").replace(":45", ".75")) * 60;
+
+      if (dayjs(dayjs.utc().utcOffset(offset).format("h:mma"), "h:mma").isBetween(dayjs(hrs[0], "h:mma"), dayjs(hrs[1], "h:mma"))) {
+        if (!conf.get(whitelist).includes(String(msg.channel.id))) {
+          msg.react("🟡");
+        }
+      }
+    }
+  }
+
   if (msg.guild && msg.content.match(/^<@!?806929919929614346>/)) {
     call(msg);
   }
