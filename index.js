@@ -145,7 +145,7 @@ client.on('message', msg => {
       if (dayjs(dayjs().tz(conf.get(timezone)).format("h:mma"), "h:mma").isBetween(rangeStart, rangeEnd)) {
         if (!conf.get(whitelist).includes(String(msg.channel.id))) {
           msg.delete()
-            .then(() => console.log(symbols.warning, ` user ${(author + "").padEnd(20, " ")} had message deleted          (server ${guild})`));
+            .then(() => console.log(symbols.warning, ` user ${(author + "").padEnd(20, " ")} ${"had message deleted".padEnd(45, " ")} (server ${guild})`));
         }
       }
     }
@@ -176,7 +176,7 @@ raise = (_msg, err) => {
 set = (key, value, _msg) => {
   conf.set(key, value);
   _msg.react("✅");
-  console.log(symbols.info, ` user ${(_msg.author.id + "").padEnd(20, " ")} ${key.slice(key.lastIndexOf(".") + 1).padEnd(9, " ")} -> ${(typeof value === "object" ? `length ${value.length}` : value).padEnd(15, " ")} (server ${_msg.guild.id})`);
+  console.log(symbols.info, ` user ${(_msg.author.id + "").padEnd(20, " ")} ${key.slice(key.lastIndexOf(".") + 1).padEnd(9, " ")} -> ${(typeof value === "object" ? `length ${value.length}` : value).padEnd(32, " ")} (server ${_msg.guild.id})`);
 }
 
 exists = key => !(conf.get(key) === undefined || conf.get(key).length == 0);
