@@ -41,15 +41,11 @@ const ranges = new RegExp(`${times}-${times}`, "gm");
 const symbols = require("log-symbols");
 
 const commands = {
-  "ping": (args, _msg) => {
-    _msg.channel.send("pong!")
-  },
-
   "whitelist": (args, _msg) => {
     let whitelist = `users.${_msg.author.id}.${_msg.guild.id}.whitelist`;
     // @Muffy whitelist
     if (args.length == 0) {
-      _msg.channel.send(`your whitelist is ${exists(whitelist) ? conf.get(whitelist).map(x => `<#${x}>`).join(", ") : "empty!"}`);
+      respond(`Your whitelist for this server is ${exists(whitelist) ? conf.get(whitelist).map(x => `<#${x}>`).join(", ") + "." : "empty!"}`, _msg);
     // @Muffy whitelist reset
     } else if (args[0] == "reset") {
       set(whitelist, [], _msg);
@@ -59,15 +55,15 @@ const commands = {
       if (args.every(x => x.match(/^<#\d+>$/))) {
         set(whitelist, _msg.mentions.channels.array().map(x => x.id), _msg);
       } else {
-        raise(_msg, "i can't do that! (make sure you only reference channels!)");
+        respondError("Make sure you only reference channels!", _msg);
       }
     // @Muffy whitelist [@user]
     } else if (args[0].match(/^<@!?\d+>$/)) {
       let w = `users.${_msg.mentions.members.array().find((u, i) => i == 1).user.id}.${_msg.guild.id}.whitelist`;
-      _msg.channel.send(`this user's whitelist is ${exists(w) ? conf.get(w).map(x => `<#${x}>`).join(", ") : "empty!"}`);
+      respond(`This user's whitelist is ${exists(w) ? conf.get(w).map(x => `<#${x}>`).join(", ") + "." : "empty!"}`, _msg);
     // anything else
     } else {
-      raise(_msg, "that isn't a valid argument!");
+      respondError("Make sure you only reference channels!", _msg);
     }
   },
 
@@ -75,21 +71,21 @@ const commands = {
     let timezone = `users.${_msg.author.id}.timezone`;
     // @Muffy timezone
     if (args.length == 0) {
-      _msg.channel.send(`${exists(timezone) ? `your timezone is ${conf.get(timezone)}` : "you haven't set your timezone!"}`);
+      respond(`${exists(timezone) ? `Your timezone is **${conf.get(timezone)}**.` : "You haven't set your timezone!"}`, _msg);
     // @Muffy timezone reset
     } else if (args[0] == "reset") {
       set(timezone, "", _msg);
     // @Muffy timezone [@user]
     } else if (args[0].match(/^<@!?\d+>$/)) {
-      let o = `users.${_msg.mentions.members.array().find((u, i) => i == 1).user.id}.timezone`;
-      _msg.channel.send(`${exists(o) ? `this user's timezone is ${conf.get(o)}` : `this user hasn't set their timezone!`}`);
+      let t = `users.${_msg.mentions.members.array().find((u, i) => i == 1).user.id}.timezone`;
+      respond(`${exists(t) ? `This user's timezone is **${conf.get(t)}**.` : `This user hasn't set their timezone!`}`, _msg);
     // anything else
     } else {
       let valid = true;
       try {
         let time = dayjs().tz(args[0]);
       } catch {
-        raise(_msg, "that isn't a valid timezone!");
+        respondError("Make sure the timezone you're referencing is in the tz database!", _msg);
         valid = false;
       }
 
@@ -101,7 +97,7 @@ const commands = {
     let range = `users.${_msg.author.id}.${_msg.guild.id}.range`;
     // @Muffy range
     if (args.length == 0) {
-      _msg.channel.send(`${exists(range) ? `your time range is ${conf.get(range)}` : "you haven't set your time range!"}`);
+      respond(`${exists(range) ? `Your time range for this server is **${conf.get(range)}**.` : "You haven't set a time range for this server!"}`, _msg);
     // @Muffy range reset
     } else if (args[0] == "reset") {
       set(range, "", _msg);
@@ -111,10 +107,10 @@ const commands = {
     // @Muffy range [@user]
     } else if (args[0].match(/^<@!?\d+>$/)) {
       let r = `users.${_msg.mentions.members.array().find((u, i) => i == 1).user.id}.${_msg.guild.id}.range`;
-      _msg.channel.send(`${exists(r) ? `this user's time range is ${conf.get(r)}` : `this user hasn't set their time range!`}`);
+      respond(`${exists(r) ? `This user's time range is **${conf.get(r)}**.` : `This user hasn't set their time range!`}`, _msg);
     // anything else
     } else {
-      raise(_msg, "that isn't a valid time range!");
+      respondError("Make sure the time range is formatted correctly, like **9:00am-5:00pm**!", _msg)
     }
   }
 };
@@ -169,8 +165,19 @@ call = _msg => {
 }
 
 // utils
-raise = (_msg, err) => {
-  _msg.channel.send(err);
+respond = (response, _msg) => {
+  _msg.channel.send({ embed: {
+    color: "#2bd642",
+    description: response
+  }});
+}
+
+respondError = (solution, _msg) => {
+  _msg.channel.send({ embed: {
+    color: "#d6392b",
+    title: "I can't do that!",
+    description: solution
+  }});
 }
 
 set = (key, value, _msg) => {
