@@ -27,10 +27,10 @@ var customParseFormat = require("dayjs/plugin/customParseFormat");
 dayjs.extend(customParseFormat);
 var isBetween = require("dayjs/plugin/isBetween");
 dayjs.extend(isBetween);
+var timezone = require("dayjs/plugin/timezone");
+dayjs.extend(timezone);
 
 // regex helpers
-const offsets = /^(-?[39]|[456]|10):30$|^([58]|12):45$|^-?([2-9]|1[0-2]?)$|^13$|^14$|^0$/;
-
 const H = "([2-9]|1[0-2]?)";
 const MM = "(:[0-5][0-9])";
 const a = "(am|pm)";
@@ -43,18 +43,6 @@ const symbols = require("log-symbols");
 const commands = {
   "ping": (args, _msg) => {
     _msg.channel.send("pong!")
-  },
-
-  "time": (args, _msg) => {
-    let date = dayjs.utc();
-    // @Muffy time
-    if (args.length == 0) {
-      let offset = +(conf.get(`users.${_msg.author.id}.offset`).replace(":30", ".5").replace(":45", ".75")) * 60;
-      // TODO: handle empty offset
-      _msg.channel.send(`it is ${date.utcOffset(offset).format("h:mma")} on ${date.format("MMMM D, YYYY")} for you right now`);
-    // TODO: other cases
-    } else {
-    }
   },
 
   "whitelist": (args, _msg) => {
@@ -83,24 +71,29 @@ const commands = {
     }
   },
 
-  "offset": (args, _msg) => {
-    let offset = `users.${_msg.author.id}.offset`;
-    // @Muffy offset
+  "timezone": (args, _msg) => {
+    let timezone = `users.${_msg.author.id}.timezone`;
+    // @Muffy timezone
     if (args.length == 0) {
-      _msg.channel.send(`${exists(offset) ? `your offset is UTC${conf.get(offset)}` : "you haven't set your offset!"}`);
-    // @Muffy offset reset
+      _msg.channel.send(`${exists(timezone) ? `your timezone is ${conf.get(timezone)}` : "you haven't set your timezone!"}`);
+    // @Muffy timezone reset
     } else if (args[0] == "reset") {
-      set(offset, "", _msg);
-    // @Muffy offset [valid offset]
-    } else if (args[0].match(offsets)) {
-      set(offset, args[0], _msg);
-    // @Muffy offset [@user]
+      set(timezone, "", _msg);
+    // @Muffy timezone [@user]
     } else if (args[0].match(/^<@!?\d+>$/)) {
-      let o = `users.${_msg.mentions.members.array().find((u, i) => i == 1).user.id}.offset`;
-      _msg.channel.send(`${exists(o) ? `this user's offset is ${conf.get(o)}` : `this user hasn't set their offset!`}`);
+      let o = `users.${_msg.mentions.members.array().find((u, i) => i == 1).user.id}.timezone`;
+      _msg.channel.send(`${exists(o) ? `this user's timezone is ${conf.get(o)}` : `this user hasn't set their timezone!`}`);
     // anything else
     } else {
-      raise(_msg, "that isn't a valid UTC offset!");
+      let valid = true;
+      try {
+        let time = dayjs().tz(args[0]);
+      } catch {
+        raise(_msg, "that isn't a valid timezone!");
+        valid = false;
+      }
+
+      if (valid) set(timezone, args[0], _msg);
     }
   },
 
@@ -138,19 +131,18 @@ client.on('message', msg => {
     let author = msg.author.id;
     let guild = msg.guild.id;
     let whitelist = `users.${author}.${guild}.whitelist`;
-    let offset = `users.${author}.offset`;
+    let timezone = `users.${author}.timezone`;
     let range = `users.${author}.${guild}.range`;
-    if (exists(offset) && exists(range)) {
+    if (exists(timezone) && exists(range)) {
       let hrs = conf.get(range).split("-");
-      let rangeStart = dayjs(hrs[0], "h:mma");
-      let rangeEnd = dayjs(hrs[1], "h:mma");
-      offset = Number(conf.get(offset).replace(":30", ".5").replace(":45", ".75")) * 60;
+      let rangeStart = dayjs(hrs[0], "h:mma").tz(conf.get(timezone));
+      let rangeEnd = dayjs(hrs[1], "h:mma").tz(conf.get(timezone));
 
       if (hrs[0].endsWith("pm") && hrs[1].endsWith("am")) {
         rangeEnd = rangeEnd.add(1, "day");
       }
 
-      if (dayjs(dayjs.utc().utcOffset(offset).format("h:mma"), "h:mma").isBetween(rangeStart, rangeEnd)) {
+      if (dayjs(dayjs().tz(conf.get(timezone)).format("h:mma"), "h:mma").isBetween(rangeStart, rangeEnd)) {
         if (!conf.get(whitelist).includes(String(msg.channel.id))) {
           msg.delete()
             .then(() => console.log(symbols.warning, ` user ${(author + "").padEnd(20, " ")} had message deleted          (server ${guild})`));
