@@ -134,7 +134,8 @@ const commands = {
 // emitted when muffy is ready to start
 client.on('ready', () => {
   console.log(symbols.success, " logged in!");
-  console.log(symbols.info, ` storing data for ${Object.keys(conf.get("users")).length} users\n`)
+  console.log(symbols.info, ` watching users in ${client.guilds.cache.size} servers\n`)
+  client.user.setActivity(`users in ${client.guilds.cache.size}+ servers`, { type: "WATCHING" });
 });
 
 // emitted on message
