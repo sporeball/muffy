@@ -37,10 +37,26 @@ const a = "(am|pm)";
 const times = `${H}${MM}${a}`;
 const ranges = new RegExp(`${times}-${times}`, "gm");
 
-// log symbols
+// other
+const help = require("./help.js");
 const symbols = require("log-symbols");
 
 const commands = {
+  "help": (args, _msg) => {
+    // @Muffy help
+    if (args.length == 0) {
+      _msg.channel.send({ embed: help.general });
+    } else if (args[0] == "whitelist") {
+      _msg.channel.send({ embed: help.whitelist });
+    } else if (args[0] == "timezone") {
+      _msg.channel.send({ embed: help.timezone });
+    } else if (args[0] == "range") {
+      _msg.channel.send({ embed: help.range });
+    } else {
+      respondError("Make sure you ask for help with a valid command!", _msg);
+    }
+  },
+
   "whitelist": (args, _msg) => {
     let whitelist = `users.${_msg.author.id}.${_msg.guild.id}.whitelist`;
     // @Muffy whitelist
