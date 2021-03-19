@@ -1,6 +1,6 @@
 {
   "name": "muffy",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Discord bot that temporarily restricts the channels you're allowed to use",
   "main": "index.js",
   "scripts": {

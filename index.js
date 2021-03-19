@@ -126,7 +126,7 @@ const commands = {
       respond(`${exists(r) ? `This user's time range is **${conf.get(r)}**.` : `This user hasn't set their time range!`}`, _msg);
     // anything else
     } else {
-      respondError("Make sure the time range is formatted correctly, like **9:00am-5:00pm**!", _msg)
+      respondError("Make sure the time range is formatted correctly, like **9:00am-5:00pm**!", _msg);
     }
   }
 };
@@ -134,7 +134,7 @@ const commands = {
 // emitted when muffy is ready to start
 client.on('ready', () => {
   console.log(symbols.success, " logged in!");
-  console.log(symbols.info, ` watching users in ${client.guilds.cache.size} servers\n`)
+  console.log(symbols.info, ` watching users in ${client.guilds.cache.size} servers\n`);
   client.user.setActivity(`users in ${client.guilds.cache.size}+ servers`, { type: "WATCHING" });
 });
 
