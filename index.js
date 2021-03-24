@@ -141,6 +141,7 @@ client.on('ready', () => {
 // emitted on message
 client.on('message', msg => {
   if (msg.guild) {
+    let deleted = false;
     let author = msg.author.id;
     let guild = msg.guild.id;
     let whitelist = `users.${author}.${guild}.whitelist`;
@@ -156,16 +157,19 @@ client.on('message', msg => {
       }
 
       if (dayjs(dayjs().tz(conf.get(timezone)).format("h:mma"), "h:mma").isBetween(rangeStart, rangeEnd)) {
-        if (!conf.get(whitelist).includes(String(msg.channel.id))) {
-          msg.delete()
-            .then(() => console.log(symbols.warning, ` user ${(author + "").padEnd(20, " ")} ${"had message deleted".padEnd(45, " ")} (server ${guild})`));
+        if (!exists(whitelist) || (exists(whitelist) && !conf.get(whitelist).includes(String(msg.channel.id)))) {
+          msg.delete();
+          deleted = true;
+          console.log(symbols.warning, ` user ${(author + "").padEnd(20, " ")} ${"had message deleted".padEnd(45, " ")} (server ${guild})`);
         }
       }
     }
-  }
 
-  if (msg.guild && msg.content.match(/^<@!?806929919929614346>/)) {
-    call(msg);
+    if (!deleted) {
+      if (msg.content.match(/^<@!?806929919929614346>/)) {
+        call(msg);
+      }
+    }
   }
 });
 
