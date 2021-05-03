@@ -173,7 +173,10 @@ client.on('message', msg => {
   }
 });
 
-call = _msg => {
+client.login(process.env.TOKEN);
+
+// utils
+const call = _msg => {
   // remove the mention part
   // uses split to get around potential problems with !
   let m = _msg.content.split(" ").filter((x, i) => i != 0);
@@ -185,15 +188,22 @@ call = _msg => {
   }
 }
 
-// utils
-respond = (response, _msg) => {
+/**
+ * send an embed containing a response to a command
+ * @param {string} response
+ */
+const respond = (response, _msg) => {
   _msg.channel.send({ embed: {
     color: "#2bd642",
     description: response
   }});
 }
 
-respondError = (solution, _msg) => {
+/**
+ * send an embed as a response to an invalid command
+ * @param {string} solution - a way to remedy the issue
+ */
+const respondError = (solution, _msg) => {
   _msg.channel.send({ embed: {
     color: "#d6392b",
     title: "I can't do that!",
@@ -201,12 +211,20 @@ respondError = (solution, _msg) => {
   }});
 }
 
-set = (key, value, _msg) => {
+/**
+ * update a value in the database
+ * @param key
+ * @param value
+ */
+const set = (key, value, _msg) => {
   conf.set(key, value);
   _msg.react("✅");
   console.log(symbols.info, ` user ${(_msg.author.id + "").padEnd(20, " ")} ${key.slice(key.lastIndexOf(".") + 1).padEnd(9, " ")} -> ${(typeof value === "object" ? `length ${value.length}` : value).padEnd(32, " ")} (server ${_msg.guild.id})`);
 }
 
-exists = key => !(conf.get(key) === undefined || conf.get(key).length == 0);
-
-client.login(process.env.TOKEN);
+/**
+ * get whether a key has an actual value in the database
+ * @param key
+ * @returns {boolean}
+ */
+const exists = key => !(conf.get(key) === undefined || conf.get(key).length == 0);
